@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">NYT</string>
+    <string name="txt_search">Search</string>
+    <string name="txt_search_article">Search Articles</string>
+    <string name="txt_popular">Popular</string>
+    <string name="txt_most_viewed">Most Viewed</string>
+    <string name="txt_most_shared">Most Shared</string>
+    <string name="txt_most_emailed">Most Emailed</string>
+    <string name="query_hint">Search articles here..</string>
+    <string name="query_null">Please enter article name or author.</string>
+</resources>
