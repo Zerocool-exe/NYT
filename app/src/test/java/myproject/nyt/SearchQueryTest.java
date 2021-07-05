@@ -3,7 +3,6 @@ package myproject.nyt;
 import org.junit.Test;
 
 import myproject.nyt.ui.PopularArticle;
-import myproject.nyt.ui.SearchArticle;
 
 import static org.junit.Assert.assertFalse;
 

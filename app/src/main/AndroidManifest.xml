@@ -21,8 +21,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.SearchArticle" />
         <activity android:name=".ui.PopularArticle" />
+        <activity android:name=".ui.SearchArticle" />
     </application>
 
 </manifest>

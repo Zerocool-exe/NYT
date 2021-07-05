@@ -1,55 +1,46 @@
 package myproject.nyt.ui;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
-import android.os.AsyncTask;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
 import java.util.List;
 
 import myproject.nyt.R;
 import myproject.nyt.adp.ArticleAdp;
+import myproject.nyt.adp.SearchArticleAdp;
 import myproject.nyt.model.ArticleMdl;
-import myproject.nyt.util.Config;
-import myproject.nyt.util.Constants;
-import myproject.nyt.util.JSONParser;
-
-import static myproject.nyt.util.Constants.API_KEY;
-import static myproject.nyt.util.Constants.NO_DATA;
+import myproject.nyt.model.ConnectionModel;
+import myproject.nyt.model.SearchMdl;
+import myproject.nyt.model.SearchModel;
+import myproject.nyt.model.SearchWrapper;
+import myproject.nyt.model.ViewModel;
+import myproject.nyt.util.ConnectionLiveData;
 
 public class SearchArticle extends AppCompatActivity
 {
-    TextView txtPageTitle;
-    EditText edtSearch;
+    ImageView imgBack,img;
     Button btnSearch;
-    ImageView imgBack;
-    ListView listArticles;
-    public static String str_query="";
-
-    Config config=null;
-    ArticleMdl articleMdl=null;
-    ArticleAdp articleAdp=null;
-    ArrayList<ArticleMdl> articleMdls=null;
-    JSONParser jsonParser=null;
-    JSONArray jsonArray=null,jsonArray1=null;
-    JSONObject jsonObject=null,jsonObject1=null;
-    ProgressDialog pDialog;
+    String str_query="";
+    EditText edtSearch;
+    RecyclerView listSearch;
+    SearchArticleAdp searchArticleAdp=null;
+    SearchModel searchModel;
+    ConnectionLiveData connectionLiveData=null;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -57,14 +48,14 @@ public class SearchArticle extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.search_articles);
 
-        config = new Config(this);
-        jsonParser = new JSONParser(this);
+        connectionLiveData = new ConnectionLiveData(this);
+        searchModel = ViewModelProviders.of(this).get(SearchModel.class);
 
-        txtPageTitle = findViewById(R.id.txtPageTitle);         txtPageTitle.setText(R.string.txt_search_article);
-        edtSearch = findViewById(R.id.edtSearch);
-        btnSearch = findViewById(R.id.btnSearch);
         imgBack = findViewById(R.id.imgBack);
-        listArticles = findViewById(R.id.listSearchArticles);
+        img = findViewById(R.id.img);
+        btnSearch = findViewById(R.id.btnSearch);
+        edtSearch = findViewById(R.id.edtSearch);
+        listSearch = findViewById(R.id.listSearch);
 
         imgBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -72,107 +63,71 @@ public class SearchArticle extends AppCompatActivity
                 startActivity(new Intent(SearchArticle.this,Mainpage.class));
             }
         });
-        btnSearch.setOnClickListener(new View.OnClickListener() {
+        btnSearch.setOnClickListener(new View.OnClickListener()
+        {
             @Override
-            public void onClick(View view) {
+            public void onClick(View view)
+            {
                 str_query = edtSearch.getText().toString().trim();
                 if(str_query.equals(""))
                 {
-                    Toast.makeText(SearchArticle.this, R.string.query_null, Toast.LENGTH_SHORT).show();
-                    listArticles.setAdapter(null);
+                    Toast.makeText(SearchArticle.this, "Enter search query.", Toast.LENGTH_SHORT).show();
                 }
                 else
                 {
-                    if(config.isNetworkAvailable(SearchArticle.this))
+                    connectionLiveData.observe(SearchArticle.this, new Observer<ConnectionModel>()
                     {
-                        new GetArticles().execute();
-                    }
-                    else
-                    {
-                        Toast.makeText(SearchArticle.this, Constants.NO_INTERNET_CONNECTION, Toast.LENGTH_SHORT).show();
-                    }
+                        @Override
+                        public void onChanged(@Nullable ConnectionModel connection)
+                        {
+                            if (connection.getIsConnected())
+                            {
+                                switch (connection.getType())
+                                {
+                                    case 1:
+                                    {
+                                        img.setVisibility(View.GONE);
+                                        //Toast.makeText(SearchArticle.this, String.format("Wifi turned ON"),         Toast.LENGTH_SHORT).show();
+                                        searchModel.GetSearchedArticles(str_query).observe(SearchArticle.this, new Observer<List<SearchMdl.DocData>>() {
+                                            @Override
+                                            public void onChanged(List<SearchMdl.DocData> articleList) {
+                                                System.out.println("articleList=" + articleList);
+                                                prepareRecyclerView(articleList);
+                                            }
+                                        });
+                                        break;
+                                    }
+                                    case 0:
+                                    {
+                                        img.setVisibility(View.GONE);
+                                        //Toast.makeText(SearchArticle.this, String.format("Mobile data turned ON"), Toast.LENGTH_SHORT).show();
+                                        searchModel.GetSearchedArticles(str_query).observe(SearchArticle.this, articleList -> {
+                                            prepareRecyclerView(articleList);
+                                        });
+                                        break;
+                                    }
+                                }
+                            } else {
+                                img.setVisibility(View.VISIBLE);
+                                Toast.makeText(SearchArticle.this, String.format("Connection turned OFF"), Toast.LENGTH_SHORT).show();
+                                prepareRecyclerView(null);
+                            }
+                        }
+                    });
                 }
             }
         });
     }
-    private class GetArticles extends AsyncTask<String, Void, String>
-    {
-        @Override
-        protected void onPreExecute()
-        {
-            super.onPreExecute();
-            pDialog = new ProgressDialog(SearchArticle.this);
-            pDialog.setMessage("Retrieving articles...");
-            pDialog.setIndeterminate(false);
-            pDialog.setCancelable(false);
-            pDialog.show();
+    private void prepareRecyclerView(List<SearchMdl.DocData> articleList) {
+        searchArticleAdp = new SearchArticleAdp(articleList);
+        if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            listSearch.setLayoutManager(new LinearLayoutManager(this));
+        } else {
+            listSearch.setLayoutManager(new GridLayoutManager(this, 2));
         }
-        @Override
-        protected String doInBackground(String[] param)
-        {
-            try
-            {
-                List<NameValuePair> params = new ArrayList<NameValuePair>();
-                params.add(new BasicNameValuePair("q", str_query));
-                params.add(new BasicNameValuePair("api-key", API_KEY));
-
-                JSONObject json = (JSONObject) jsonParser.makeHttpRequest(config.GET_ARTICLES, "GET", params);
-
-                articleMdls = new ArrayList<>();
-                articleMdls.clear();
-                if(json.optString("status").equals("OK"))
-                {
-                    jsonObject = json.optJSONObject("response");
-                    if (jsonObject.length()>0)
-                    {
-                        jsonArray = jsonObject.optJSONArray("docs");
-                        if(jsonArray.length()>0)
-                        {
-                            for(int i=0;i<jsonArray.length();i++)
-                            {
-                                jsonObject1 = jsonArray.optJSONObject(i);
-                                articleMdl = new ArticleMdl(jsonObject1.optString("abstract"),jsonObject1.optString("pub_date"));
-                                articleMdls.add(articleMdl);
-                            }
-                            articleAdp = new ArticleAdp(SearchArticle.this,articleMdls);
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    listArticles.setAdapter(articleAdp);
-                                }
-                            });
-                        }
-                        else
-                        {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(SearchArticle.this, NO_DATA, Toast.LENGTH_SHORT).show();
-                                    listArticles.setAdapter(null);
-                                }
-                            });
-                        }
-                    }
-                    else
-                    {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(SearchArticle.this, NO_DATA, Toast.LENGTH_SHORT).show();
-                                listArticles.setAdapter(null);
-                            }
-                        });
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-        protected void onPostExecute(String file_url)
-        {
-            pDialog.dismiss();
-        }
+        listSearch.setItemAnimator(new DefaultItemAnimator());
+        listSearch.setAdapter(searchArticleAdp);
+        searchArticleAdp.notifyDataSetChanged();
     }
     @Override
     public void onBackPressed()

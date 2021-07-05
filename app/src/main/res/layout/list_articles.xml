@@ -13,7 +13,12 @@
     <TextView
         android:id="@+id/txtPublishDate"
         android:layout_width="match_parent"
+        android:layout_marginTop="@dimen/_3sdp"
         android:layout_height="wrap_content"
         android:textColor="@color/black"
         android:textSize="@dimen/_14sdp" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_1sdp"
+        android:background="@color/black" />
 </LinearLayout>

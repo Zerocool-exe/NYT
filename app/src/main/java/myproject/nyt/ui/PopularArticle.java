@@ -2,6 +2,7 @@ package myproject.nyt.ui;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
@@ -12,6 +13,12 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -24,7 +31,11 @@ import java.util.List;
 import myproject.nyt.R;
 import myproject.nyt.adp.ArticleAdp;
 import myproject.nyt.model.ArticleMdl;
+import myproject.nyt.model.ArticleWrapper;
+import myproject.nyt.model.ConnectionModel;
+import myproject.nyt.model.ViewModel;
 import myproject.nyt.util.Config;
+import myproject.nyt.util.ConnectionLiveData;
 import myproject.nyt.util.Constants;
 import myproject.nyt.util.JSONParser;
 
@@ -35,17 +46,14 @@ public class PopularArticle extends AppCompatActivity
 {
     ImageView imgBack;
     TextView txtPageTitle;
-    ListView listPopular;
+    ImageView img;
+    RecyclerView listPopular;
     public static String str_query="",api_url="";
 
     Config config=null;
-    ArticleMdl articleMdl=null;
     ArticleAdp articleAdp=null;
-    ArrayList<ArticleMdl> articleMdls=null;
-    JSONParser jsonParser=null;
-    JSONArray jsonArray=null,jsonArray1=null;
-    JSONObject jsonObject=null,jsonObject1=null;
-    ProgressDialog pDialog;
+    ViewModel mainViewModel;
+    ConnectionLiveData connectionLiveData=null;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -53,11 +61,12 @@ public class PopularArticle extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.popular_articles);
 
+        connectionLiveData = new ConnectionLiveData(this);
         config = new Config(this);
-        jsonParser = new JSONParser(this);
 
         txtPageTitle = findViewById(R.id.txtPageTitle);
         imgBack = findViewById(R.id.imgBack);
+        img = findViewById(R.id.img);
         listPopular = findViewById(R.id.listPopular);
 
         str_query = getIntent().getExtras().getString("type");
@@ -82,79 +91,53 @@ public class PopularArticle extends AppCompatActivity
             txtPageTitle.setText(R.string.txt_most_emailed);
             api_url = config.MOST_EMAILED;
         }
-        if(config.isNetworkAvailable(PopularArticle.this))
+        mainViewModel = ViewModelProviders.of(this).get(ViewModel.class);
+        connectionLiveData.observe(this, new Observer<ConnectionModel>()
         {
-            new GetArticles().execute();
-        }
-        else
-        {
-            Toast.makeText(PopularArticle.this, Constants.NO_INTERNET_CONNECTION, Toast.LENGTH_SHORT).show();
-        }
-    }
-    private class GetArticles extends AsyncTask<String, Void, String>
-    {
-        @Override
-        protected void onPreExecute()
-        {
-            super.onPreExecute();
-            pDialog = new ProgressDialog(PopularArticle.this);
-            pDialog.setMessage("Retrieving articles...");
-            pDialog.setIndeterminate(false);
-            pDialog.setCancelable(false);
-            pDialog.show();
-        }
-        @Override
-        protected String doInBackground(String[] param)
-        {
-            try
+            @Override
+            public void onChanged(@Nullable ConnectionModel connection)
             {
-                List<NameValuePair> params = new ArrayList<NameValuePair>();
-                params.add(new BasicNameValuePair("api-key", API_KEY));
-
-                JSONObject json = (JSONObject) jsonParser.makeHttpRequest(api_url,"GET", params);
-
-                articleMdls = new ArrayList<>();
-                articleMdls.clear();
-                if(json.optString("status").equals("OK"))
+                if (connection.getIsConnected())
                 {
-                    jsonArray = json.optJSONArray("results");
-                    System.out.println("results="+json.optJSONArray("results"));
-                    if(jsonArray.length()>0)
+                    switch (connection.getType())
                     {
-                        for(int i=0;i<jsonArray.length();i++)
+                        case 1:
                         {
-                            jsonObject1 = jsonArray.optJSONObject(i);
-                            articleMdl = new ArticleMdl(jsonObject1.optString("title"),jsonObject1.optString("published_date"));
-                            articleMdls.add(articleMdl);
+                            img.setVisibility(View.GONE);
+                            Toast.makeText(PopularArticle.this, String.format("Wifi turned ON"),         Toast.LENGTH_SHORT).show();
+                            mainViewModel.GetAllArticles(str_query).observe(PopularArticle.this, articleList -> {
+                                prepareRecyclerView(articleList);
+                            });
+                            break;
                         }
-                        articleAdp = new ArticleAdp(PopularArticle.this,articleMdls);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                listPopular.setAdapter(articleAdp);
-                            }
-                        });
+                        case 0:
+                        {
+                            img.setVisibility(View.GONE);
+                            Toast.makeText(PopularArticle.this, String.format("Mobile data turned ON"), Toast.LENGTH_SHORT).show();
+                            mainViewModel.GetAllArticles(str_query).observe(PopularArticle.this, articleList -> {
+                                prepareRecyclerView(articleList);
+                            });
+                            break;
+                        }
                     }
-                    else
-                    {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(PopularArticle.this, NO_DATA, Toast.LENGTH_SHORT).show();
-                                listPopular.setAdapter(null);
-                            }
-                        });
-                    }
+                } else {
+                    img.setVisibility(View.VISIBLE);
+                    Toast.makeText(PopularArticle.this, String.format("Connection turned OFF"), Toast.LENGTH_SHORT).show();
+                    prepareRecyclerView(null);
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
             }
-            return null;
+        });
+    }
+    private void prepareRecyclerView(List<ArticleMdl> articleList) {
+        articleAdp = new ArticleAdp(articleList);
+        if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            listPopular.setLayoutManager(new LinearLayoutManager(this));
+        } else {
+            listPopular.setLayoutManager(new GridLayoutManager(this, 2));
         }
-        protected void onPostExecute(String file_url)
-        {
-            pDialog.dismiss();
-        }
+        listPopular.setItemAnimator(new DefaultItemAnimator());
+        listPopular.setAdapter(articleAdp);
+        articleAdp.notifyDataSetChanged();
     }
     @Override
     public void onBackPressed()

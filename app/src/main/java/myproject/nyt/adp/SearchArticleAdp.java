@@ -1,37 +1,27 @@
 package myproject.nyt.adp;
 
-import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.Filter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import myproject.nyt.R;
 import myproject.nyt.model.ArticleMdl;
 import myproject.nyt.model.SearchMdl;
-import myproject.nyt.util.Config;
+import myproject.nyt.model.SearchWrapper;
 
-public class ArticleAdp extends RecyclerView.Adapter<BaseViewHolder>
+public class SearchArticleAdp extends RecyclerView.Adapter<BaseViewHolder>
 {
-    private static final String TAG = "ArticleAdapter";
-    private List<ArticleMdl> articleMdls;
-    public ArticleAdp(List<ArticleMdl> articleMdlList)
+    private static final String TAG = "SearchArticleAdapter";
+    private List<SearchMdl.DocData> searchMdls;
+    public SearchArticleAdp(List<SearchMdl.DocData> searchMdlList)
     {
-        articleMdls = articleMdlList;
+        searchMdls = searchMdlList;
     }
 
     @NonNull
@@ -47,8 +37,8 @@ public class ArticleAdp extends RecyclerView.Adapter<BaseViewHolder>
 
     @Override
     public int getItemCount() {
-        if (articleMdls != null && articleMdls.size() > 0) {
-            return articleMdls.size();
+        if (searchMdls != null && searchMdls.size() > 0) {
+            return searchMdls.size();
         } else {
             return 0;
         }
@@ -68,14 +58,12 @@ public class ArticleAdp extends RecyclerView.Adapter<BaseViewHolder>
         }
         public void onBind(int position) {
             super.onBind(position);
-            final ArticleMdl articleMdl = articleMdls.get(position);
+            //final SearchMdl searchMdl = searchMdls.get(position);
             // System.out.println("medialist=="+articleMdl.getMediaDataList().get(0).getMedia_metaDataList().get(2).getUrl());
 
-            if (articleMdl.getTitle() != null) {
-                txtTitle.setText(articleMdl.getTitle());
-            }
-            if (articleMdl.getPub_date() != null) {
-                txtPubDate.setText(articleMdl.getPub_date());
+            if (searchMdls != null) {
+                txtTitle.setText(searchMdls.get(position).getmAbstract());
+                txtPubDate.setText(searchMdls.get(position).getPub_date());
             }
         }
     }

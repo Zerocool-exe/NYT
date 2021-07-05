@@ -5,20 +5,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <include layout="@layout/header" />
-
-    <!--<androidx.appcompat.widget.SearchView
-        android:id="@+id/searchArticle"
-        app:iconifiedByDefault="false"
+    <ImageView
+        android:id="@+id/img"
+        android:visibility="gone"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/_40sdp"
-        app:queryHint="@string/query_hint"
-        app:defaultQueryHint="@string/query_hint"
-        android:background="@drawable/txt_border"
-        android:layout_margin="@dimen/_10sdp"/> -->
-    <ListView
+        android:layout_height="match_parent"
+        android:src="@drawable/no_internet" />
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/listPopular"
-        android:divider="@color/black"
-        android:dividerHeight="@dimen/_1sdp"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 </LinearLayout>

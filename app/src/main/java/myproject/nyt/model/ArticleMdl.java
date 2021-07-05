@@ -1,13 +1,15 @@
 package myproject.nyt.model;
 
+import com.google.gson.annotations.SerializedName;
+
+import java.util.List;
+
 public class ArticleMdl
 {
-    String title,pub_date;
-
-    public ArticleMdl(String title, String pub_date) {
-        this.title = title;
-        this.pub_date = pub_date;
-    }
+    @SerializedName("title")
+    private String title;
+    @SerializedName("published_date")
+    private String pub_date;
 
     public String getTitle() {
         return title;
