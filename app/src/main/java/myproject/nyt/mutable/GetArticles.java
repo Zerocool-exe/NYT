@@ -1,4 +1,4 @@
-package myproject.nyt.ui;
+package myproject.nyt.mutable;
 
 import android.app.Application;
 

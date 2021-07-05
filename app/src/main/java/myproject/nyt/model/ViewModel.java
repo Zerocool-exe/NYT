@@ -9,7 +9,7 @@ import androidx.lifecycle.LiveData;
 import java.util.List;
 
 import myproject.nyt.mutable.GetSearchArticles;
-import myproject.nyt.ui.GetArticles;
+import myproject.nyt.mutable.GetArticles;
 
 public class ViewModel extends AndroidViewModel
 {

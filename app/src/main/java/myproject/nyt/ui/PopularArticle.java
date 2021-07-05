@@ -102,23 +102,15 @@ public class PopularArticle extends AppCompatActivity
                     switch (connection.getType())
                     {
                         case 1:
-                        {
+                        case 0: {
                             img.setVisibility(View.GONE);
-                            Toast.makeText(PopularArticle.this, String.format("Wifi turned ON"),         Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(PopularArticle.this, String.format("Wifi turned ON"),         Toast.LENGTH_SHORT).show();
                             mainViewModel.GetAllArticles(str_query).observe(PopularArticle.this, articleList -> {
                                 prepareRecyclerView(articleList);
                             });
                             break;
                         }
-                        case 0:
-                        {
-                            img.setVisibility(View.GONE);
-                            Toast.makeText(PopularArticle.this, String.format("Mobile data turned ON"), Toast.LENGTH_SHORT).show();
-                            mainViewModel.GetAllArticles(str_query).observe(PopularArticle.this, articleList -> {
-                                prepareRecyclerView(articleList);
-                            });
-                            break;
-                        }
+                        //Toast.makeText(PopularArticle.this, String.format("Mobile data turned ON"), Toast.LENGTH_SHORT).show();
                     }
                 } else {
                     img.setVisibility(View.VISIBLE);
