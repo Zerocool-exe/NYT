@@ -21,13 +21,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 import myproject.nyt.R;
-import myproject.nyt.adp.ArticleAdp;
 import myproject.nyt.adp.SearchArticleAdp;
-import myproject.nyt.model.ArticleMdl;
 import myproject.nyt.model.ConnectionModel;
 import myproject.nyt.model.SearchMdl;
-import myproject.nyt.model.SearchModel;
-import myproject.nyt.model.SearchWrapper;
 import myproject.nyt.model.ViewModel;
 import myproject.nyt.util.ConnectionLiveData;
 
@@ -39,7 +35,7 @@ public class SearchArticle extends AppCompatActivity
     EditText edtSearch;
     RecyclerView listSearch;
     SearchArticleAdp searchArticleAdp=null;
-    SearchModel searchModel;
+    ViewModel searchModel;
     ConnectionLiveData connectionLiveData=null;
 
     @Override
@@ -49,7 +45,7 @@ public class SearchArticle extends AppCompatActivity
         setContentView(R.layout.search_articles);
 
         connectionLiveData = new ConnectionLiveData(this);
-        searchModel = ViewModelProviders.of(this).get(SearchModel.class);
+        searchModel = ViewModelProviders.of(this).get(ViewModel.class);
 
         imgBack = findViewById(R.id.imgBack);
         img = findViewById(R.id.img);
