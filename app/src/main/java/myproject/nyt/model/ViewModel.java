@@ -19,6 +19,7 @@ public class ViewModel extends AndroidViewModel
     public ViewModel(@NonNull Application application) {
         super(application);
         popularArticles = new GetArticles(application);
+        searchArticles = new GetSearchArticles(application);
     }
     public LiveData<List<ArticleMdl>> GetAllArticles(String api_url) {
         return popularArticles.getMutableLiveData(api_url);
