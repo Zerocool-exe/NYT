@@ -1,4 +1,4 @@
-package myproject.nyt.model;
+package myproject.nyt.util;
 
 import android.app.Application;
 
@@ -8,6 +8,8 @@ import androidx.lifecycle.LiveData;
 
 import java.util.List;
 
+import myproject.nyt.model.ArticleMdl;
+import myproject.nyt.model.SearchMdl;
 import myproject.nyt.mutable.GetSearchArticles;
 import myproject.nyt.mutable.GetArticles;
 

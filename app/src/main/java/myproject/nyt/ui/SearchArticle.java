@@ -24,7 +24,7 @@ import myproject.nyt.R;
 import myproject.nyt.adp.SearchArticleAdp;
 import myproject.nyt.model.ConnectionModel;
 import myproject.nyt.model.SearchMdl;
-import myproject.nyt.model.ViewModel;
+import myproject.nyt.util.ViewModel;
 import myproject.nyt.util.ConnectionLiveData;
 
 public class SearchArticle extends AppCompatActivity

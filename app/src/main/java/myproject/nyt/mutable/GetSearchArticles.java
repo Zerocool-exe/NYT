@@ -1,6 +1,7 @@
 package myproject.nyt.mutable;
 
 import android.app.Application;
+import android.widget.Toast;
 
 import androidx.lifecycle.MutableLiveData;
 
@@ -32,15 +33,14 @@ public class GetSearchArticles
     public MutableLiveData<List<SearchMdl.DocData>> getMutableLiveData(String query)
     {
         RestApiService apiService = RetrofitInstance.getApiService(SEARCH_HOST);
-        Call<SearchWrapper> call = apiService.getSearchedArticle(query,Constants.API_KEY);
+        Call<SearchWrapper> call = apiService.getSearchedArticle(query,Constants.SEARCH_API_KEY);
         call.enqueue(new Callback<SearchWrapper>() {
             @Override
             public void onResponse(Call<SearchWrapper> call, Response<SearchWrapper> response) {
-                System.out.println("searchArticles="+response.toString());
                 SearchWrapper mArticleWrapper = response.body();
-                SearchMdl searchMdl = mArticleWrapper.getResponseResults();
                 if (mArticleWrapper != null && mArticleWrapper.getResponseResults() !=null)
                 {
+                    SearchMdl searchMdl = mArticleWrapper.getResponseResults();
                     searchArticles = searchMdl.getDocResults();
                     mutableLiveData.setValue(searchArticles);
                 }
@@ -51,8 +51,7 @@ public class GetSearchArticles
             }
             @Override
             public void onFailure(Call<SearchWrapper> call, Throwable t) {
-                System.out.println("searchArticles fail="+call.request());
-                System.out.println("searchArticles fail="+t.getMessage());
+                mutableLiveData.setValue(searchArticles);
             }
         });
         return mutableLiveData;

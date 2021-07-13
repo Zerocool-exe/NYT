@@ -1,13 +1,10 @@
 package myproject.nyt.ui;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,27 +17,15 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
 import java.util.List;
 
 import myproject.nyt.R;
 import myproject.nyt.adp.ArticleAdp;
 import myproject.nyt.model.ArticleMdl;
-import myproject.nyt.model.ArticleWrapper;
 import myproject.nyt.model.ConnectionModel;
-import myproject.nyt.model.ViewModel;
+import myproject.nyt.util.ViewModel;
 import myproject.nyt.util.Config;
 import myproject.nyt.util.ConnectionLiveData;
-import myproject.nyt.util.Constants;
-import myproject.nyt.util.JSONParser;
-
-import static myproject.nyt.util.Constants.API_KEY;
-import static myproject.nyt.util.Constants.NO_DATA;
 
 public class PopularArticle extends AppCompatActivity
 {

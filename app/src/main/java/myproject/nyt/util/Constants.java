@@ -8,6 +8,7 @@ public class Constants
     public static String ERROR_404="Server error : 404";
     public static String ERROR_500="Server error : 500";
     public static String API_KEY = "3qHURcz38QhaFOFYJCSMqmpfVbsxLrXh";
+    public static String SEARCH_API_KEY = "aiV0wrAhH6fXNpxqOwP9HnEV02lUcQG2";
     public static String SEARCH_HOST = "https://api.nytimes.com/svc/search/v2/";
     public static String POPULAR_HOST = "https://api.nytimes.com/svc/mostpopular/v2/";
 
